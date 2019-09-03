@@ -1,0 +1,66 @@
+<?php
+
+$username = $_POST["username"];
+$password = $_POST["password"];
+
+if ($username && $password) {
+
+
+$request_url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+
+$url1 = 'searchapi?command=replay';
+$url2 = 'searchapi?command=search';
+
+$check1 = strripos($request_url, $url1);
+$check2 = strripos($request_url, $url2);
+
+$check = ($check1 || $check2);
+
+if ($check == false) {
+echo 'Wrong URL! ';
+} else {
+$_SERVER['HTTP_HOST']="10.0.94.157:8080";
+$request_url = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+
+$send_url = $_SERVER['REQUEST_URI'];
+$get_url = 'http://10.0.94.157:8080'.$send_url;
+
+$opts = array(
+'http'=>array(
+'method'=>"GET",
+'header' => "Authorization: Basic " . base64_encode("$username:$password") 
+)
+);
+
+$context = stream_context_create($opts);
+
+// Open the file using the HTTP headers set above
+$file = file_get_contents($get_url, false, $context);
+if ($check2 == true) {
+header("Content-Type: text/xml");
+} else {
+
+header("Content-Type: application/octet-stream");
+#header('Content-Disposition: attachment; filename="test.wav"');
+
+}
+
+echo $file;
+
+}
+} else {
+?>
+<form  method="post">
+<div>
+<label for="uname"><b>Username</b></label>
+<input type="text" placeholder="Enter Username" name="username" required>
+
+<label for="psw"><b>Password</b></label>
+<input type="password" placeholder="Enter Password" name="password" required>
+
+<button type="submit">Login</button>
+</div>
+</form>
+<?php
+}
+?>
